@@ -1,0 +1,12 @@
+{application, smart_mesh,
+ [
+  {description, "A smart routing mesh"},
+  {vsn, "1"},
+  {registered, []},
+  {applications, [
+                  kernel,
+                  stdlib
+                 ]},
+  {mod, { smart_mesh_app, []}},
+  {env, []}
+ ]}.
