@@ -10,7 +10,8 @@
 %% ===================================================================
 
 start(_StartType, _StartArgs) ->
-    smart_mesh_sup:start_link().
+  {ok, _Pid} = rproxy:start_link(),
+  smart_mesh_sup:start_link().
 
 stop(_State) ->
-    ok.
+  ok.

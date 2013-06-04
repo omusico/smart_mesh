@@ -5,7 +5,10 @@
   {registered, []},
   {applications, [
                   kernel,
-                  stdlib
+                  stdlib,
+                  crypto,
+                  ranch,
+                  cowboy
                  ]},
   {mod, { smart_mesh_app, []}},
   {env, []}
