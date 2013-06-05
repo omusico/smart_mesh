@@ -4,7 +4,12 @@ A smart routing mesh written in Erlang.
 
 # Installation
 
-1. install rebar
-2. run:
-    $ rebar compile
+You should have `erl` and `rebar` in your $PATH.
 
+```
+  $ rebar compile
+```
+
+# TODO
+
+1. save routing data to database
