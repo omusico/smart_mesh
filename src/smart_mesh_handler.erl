@@ -11,10 +11,17 @@ init({tcp, http}, Req, _Opts) ->
 handle(Req, State) ->
   {ReqMethod, Req} = cowboy_req:method(Req),
   {ReqHeadersBin, Req} = cowboy_req:headers(Req),
+  {PathBin, Req} = cowboy_req:path(Req),
+  {QueryStringBin, Req} = cowboy_req:qs(Req),
+
+  Url = string:join(["http://127.0.0.1:1986",
+    binary_to_list(PathBin),
+    "?",
+    binary_to_list(QueryStringBin)], ""),
 
   {ok, {{_HttpVsn, StatusCode, _ReasonPhrase}, RspHeaders, RspBody}} = httpc:request(
     http_method(ReqMethod),
-    {"http://127.0.0.1:1986", req_headers(ReqHeadersBin)},
+    {Url, req_headers(ReqHeadersBin)},
     [],
     [{body_format, binary}]),
   {ok, Req2} = cowboy_req:reply(StatusCode, RspHeaders, RspBody, Req),
