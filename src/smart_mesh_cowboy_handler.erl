@@ -1,4 +1,4 @@
--module(smart_mesh_handler).
+-module(smart_mesh_cowboy_handler).
 -behaviour(cowboy_http_handler).
 
 -export([init/3]).

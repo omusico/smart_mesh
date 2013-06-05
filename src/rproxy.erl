@@ -17,7 +17,7 @@
 start_link() ->
   Dispatch = cowboy_router:compile([
               %% {URIHost, list({URIPath, Handler, Opts})}
-              {'_', [{'_', smart_mesh_handler, []}]}
+              {'_', [{'_', smart_mesh_cowboy_handler, []}]}
             ]),
   %% Name, NbAcceptors, TransOpts, ProtoOpts
   cowboy:start_http(
