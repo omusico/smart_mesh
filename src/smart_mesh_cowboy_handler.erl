@@ -9,21 +9,38 @@ init({tcp, http}, Req, _Opts) ->
   {ok, Req, undefined_state}.
 
 handle(Req, State) ->
-  {ReqMethod, Req} = cowboy_req:method(Req),
+  {ReqMethodBin, Req} = cowboy_req:method(Req),
   {ReqHeadersBin, Req} = cowboy_req:headers(Req),
   {PathBin, Req} = cowboy_req:path(Req),
   {QueryStringBin, Req} = cowboy_req:qs(Req),
 
-  Url = string:join(["http://127.0.0.1:1986",
-    binary_to_list(PathBin),
-    "?",
-    binary_to_list(QueryStringBin)], ""),
+  Url = upstream_url("127.0.0.1", 1986,
+                    binary_to_list(PathBin),
+                    binary_to_list(QueryStringBin)),
 
-  {ok, {{_HttpVsn, StatusCode, _ReasonPhrase}, RspHeaders, RspBody}} = httpc:request(
-    http_method(ReqMethod),
-    {Url, req_headers(ReqHeadersBin)},
-    [],
-    [{body_format, binary}]),
+  ReqMethod = http_method(ReqMethodBin),
+
+  {ok, {{_HttpVsn, StatusCode, _ReasonPhrase}, RspHeaders, RspBody}} =
+    case ReqMethod of
+      get ->
+        httpc:request(
+          ReqMethod,
+          {Url, req_headers(ReqHeadersBin)},
+          [],
+          [{body_format, binary}]);
+      post ->
+        {ok, BodyBin, _Req} = cowboy_req:body(Req),
+
+        httpc:request(
+          ReqMethod,
+          {Url,
+            req_headers(ReqHeadersBin),
+            "application/x-www-form-urlencoded",
+            BodyBin},
+          [],
+          [{body_format, binary}])
+    end,
+
   {ok, Req2} = cowboy_req:reply(StatusCode, RspHeaders, RspBody, Req),
   {ok, Req2, State}.
 
@@ -50,4 +67,10 @@ req_headers(ReqHeadersBin) ->
       {binary_to_list(K), binary_to_list(V)}
   end,
   lists:map(F, ReqHeadersBin).
+
+upstream_url(Host, Port, Path, []) ->
+  string:join(["http://", Host, ":", integer_to_list(Port), Path], "");
+
+upstream_url(Host, Port, Path, QueryString) ->
+  string:join(["http://", Host, ":", integer_to_list(Port), Path, "?", QueryString], "").
 
