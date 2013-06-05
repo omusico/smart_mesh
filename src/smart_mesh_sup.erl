@@ -24,6 +24,9 @@ start_link() ->
 %% ===================================================================
 
 init([]) ->
-  Child = ?CHILD(domain_center, worker),
-  {ok, { {one_for_one, 5, 10}, [Child]} }.
+  Children = [
+    ?CHILD(smart_mesh_dynoman_center, worker),
+    ?CHILD(smart_mesh_proxy, worker)
+  ],
+  {ok, {{one_for_one, 5, 10}, Children}}.
 

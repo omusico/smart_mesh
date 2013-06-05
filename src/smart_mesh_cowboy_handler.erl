@@ -14,7 +14,14 @@ handle(Req, State) ->
   {PathBin, Req} = cowboy_req:path(Req),
   {QueryStringBin, Req} = cowboy_req:qs(Req),
 
-  Url = upstream_url("127.0.0.1", 1986,
+  {HostBin, Req} = cowboy_req:host(Req),
+  io:format("HOST: ~p~n", [HostBin]),
+
+  Host = binary_to_list(HostBin),
+  {ok, {Host, {Server, Port}}} = smart_mesh_proxy:lookup(Host),
+  io:format("UPSTREAM: ~p -> [~p, ~p]~n", [Host, Server, Port]),
+
+  Url = upstream_url(Server, Port,
                     binary_to_list(PathBin),
                     binary_to_list(QueryStringBin)),
 
@@ -33,10 +40,12 @@ handle(Req, State) ->
 
         httpc:request(
           ReqMethod,
-          {Url,
+          {
+            Url,
             req_headers(ReqHeadersBin),
             "application/x-www-form-urlencoded",
-            BodyBin},
+            BodyBin
+          },
           [],
           [{body_format, binary}])
     end,
